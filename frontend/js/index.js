@@ -121,10 +121,12 @@ function initCarousel(){
             if (blnRemoveConfirm) {
 
                 for (var k = allCars.length - 1; k >= 0; k--) {
-                    getAjaxPromise("/api/removecar", "POST", "carid=" + allCars[k].carid).then(function (data) {
-                        //removeCarFromTable(allCars[k].carid);
-                        //removeCarFromTable(allCars[k].carid);
+                    var formPostData = new FormData();
+                    formPostData.append('carid',allCars[k].carid);
+                    getAjaxPromise("/api/removecar", "POST", formPostData).then(function (data) {
+
                     });
+                    removeCarFromTable(allCars[k].carid);
                 }
             }
         });
