@@ -20,7 +20,7 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-        './frontend/index.html',
+        //'./frontend/index.html',
         './frontend/js/*.js',
         './test/frontend/*Spec.js'
     ],
@@ -47,8 +47,23 @@ module.exports = function(config) {
     // test results reporter to use
     // possible values: 'dots', 'progress'
     // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-    reporters: ['progress'],
+    reporters: ['progress','html'],
 
+      // the default configuration
+      htmlReporter: {
+          outputDir: './frontend', // where to put the reports
+          templatePath: null, // set if you moved jasmine_template.html
+          focusOnFailures: true, // reports show failures on start
+          namedFiles: true, // name files instead of creating sub-directories
+          pageTitle: null, // page title for reports; browser info by default
+          urlFriendlyName: false, // simply replaces spaces with _ for files/dirs
+          reportName: 'testreport', // report summary filename; browser info by default
+
+
+          // experimental
+          preserveDescribeNesting: false, // folded suites stay folded
+          foldAll: false, // reports start folded (only with preserveDescribeNesting)
+      },
 
     // web server port
     port: 9876,
@@ -64,7 +79,7 @@ module.exports = function(config) {
 
 
     // enable / disable watching file and executing tests whenever any file changes
-    autoWatch: false,
+    autoWatch: true,
 
 
     // start these browsers
@@ -74,7 +89,7 @@ module.exports = function(config) {
 
     // Continuous Integration mode
     // if true, Karma captures browsers, runs the tests and exits
-    singleRun: false,
+    singleRun: true,
 
     // Concurrency level
     // how many browser should be started simultaneous

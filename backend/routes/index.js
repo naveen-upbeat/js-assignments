@@ -1,4 +1,5 @@
 var mongo = require('mongodb'),
+    path = require('path'),
     fs = require('fs');
 
 var Server = mongo.Server,
@@ -71,7 +72,7 @@ var populateDB = function() {
 
 exports.index = function(req, res) {
             req.db = db || {};
-            res.sendfile("../frontend/index.html");
+            res.sendfile( path.join(__dirname + "../frontend/index.html"));
 }
 
 exports.getCars = function(req, res){
@@ -87,36 +88,49 @@ exports.addCar = function(req,res) {
     console.log('body',req.body);
     console.log('files',req.files);
 
+    // The name of the input field (i.e. "sampleFile") is used to retrieve the uploaded file
+    var sampleFile = req.files.img;
+
+    // Use the mv() method to place the file somewhere on your server
+
+
     if ( Object.keys( req.body).length) {
         var filename = req.files["img"]["name"];
         var bodyParam = req.body;
-        var newPath = __dirname + "/../../frontend/images/cars/" + filename;
-        var source = fs.createReadStream(req.files.img.path);
-        var dest = fs.createWriteStream(newPath);
+        var newPath = path.join(__dirname + "/../../frontend/images/cars/" + filename);
 
-        source.pipe(dest);
-        source.on('end', function() { /* copied */
-            console.log('uploaded file');
-            db.collection("cars").insert({
-                carid: bodyParam.carid,
-                manufacturer: bodyParam.manufacturer,
-                model: bodyParam.model,
-                price: bodyParam.price,
-                wiki: bodyParam.wiki,
-                img: filename
-            }, {safe: true}, function (err2, result) {
-                if (err2) {
-                    console.log("unable to update db");
-                    throw err2;
-                }
-                //res.json({
-                //    result: true
-                //});
-            });
+        sampleFile.mv(newPath, function(err) {
+            if (err) {
+                res.status(500).send(err);
+            }
+            else {
+                db.collection("cars").insert({
+                    carid: bodyParam.carid,
+                    manufacturer: bodyParam.manufacturer,
+                    model: bodyParam.model,
+                    price: bodyParam.price,
+                    wiki: bodyParam.wiki,
+                    img: filename
+                }, {safe: true}, function (err2, result) {
+                    if (err2) {
+                        console.log("unable to update db");
+                        throw err2;
+                    }
+                    //res.json({
+                    //    result: true
+                    //});
+                });
+                res.send('File uploaded!');
+            }
         });
-        source.on('error', function(err) { /* error */
-            console.log('upload file error');
-        });
+        //
+        // source.pipe(dest);
+        // source.on('end', function() { /* copied */
+        //     console.log('uploaded file');
+        // });
+        // source.on('error', function(err) { /* error */
+        //     console.log('upload file error');
+        // });
 
 
     /*
@@ -149,14 +163,12 @@ exports.addCar = function(req,res) {
     }); */
 }
 
-
 }
 
 
 exports.removeCar = function(req,res){
-    console.log(req.body);
     if(req.body.carid){
-        db.collection('cars').removeOne({carid:req.body.carid},function(err,result){
+        db.collection('cars').remove({carid:req.body.carid},function(err,result){
            if (err) throw err;
 
            res.json({

@@ -5,8 +5,10 @@
   "main": "./backend/app.js",
   "dependencies": {
     "express": "3.x",
+    "express-fileupload": "0.0.6",
     "gulp": "^3.9.1",
     "gulp-jshint": "^2.0.4",
+    "gulp-open": "^2.0.0",
     "gulp-util": "^3.0.8",
     "jasmine": "^2.5.3",
     "jshint": "^2.9.4",
@@ -18,10 +20,12 @@
     "mongodb": "^2.2.21",
     "mongoose": "^4.7.7"
   },
+  "dbconfig": {
+    "path": "/Users/sirugumn/mongodb-osx-x86_64-3.4.1"
+  },
   "scripts": {
-    "tst": "pwd && exit 1",
-    "test": "/Users/sirugumn/mongodb-osx-x86_64-3.4.1/bin/mongod --dbpath /Users/sirugumn/mongodb-osx-x86_64-3.4.1/data/db",
-    "start": "node ./backend/app.js"
+    "start": "gulp server",
+    "test": "karma start ./karma.conf.js"
   },
   "keywords": [
     "HTML5",

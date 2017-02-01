@@ -1,4 +1,3 @@
-
 /**
  *  TODO
  *  Task 1:
@@ -10,38 +9,80 @@
  *  Task 3:
  *  Write TestCases using Jasmine
  *
- * */
-function storeResponse(){
-    var responseData;
-    return{
-        _getResponse: function(){
-            return responseData;
-        },
-        setResponse: function(data){
-            responseData = data;
-        }
-    }
-}
+ **/
+// function storeResponse(){
+//     var responseData;
+//     return{
+//         _getResponse: function(){
+//             return responseData;
+//         },
+//         setResponse: function(data){
+//             responseData = data;
+//         }
+//     }
+// }
+//
+// function makeAjaxCall(url,respondFn,type,data){
+//     var xhttp = new XMLHttpRequest(), reqType, postData;
+//     xhttp.onreadystatechange = function() {
+//         if (this.readyState == 4 && this.status == 200) {
+//             respondFn(JSON.parse(this.responseText));
+//             //document.getElementById("demo").innerHTML = this.responseText;
+//         }
+//     };
+//     if(!type){
+//         reqType = "GET";
+//     }else{
+//         reqType = type.toUpperCase();
+//         //Send the proper header information along with the request
+//     }
+//     xhttp.open(reqType, url, true);
+//     xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+//     postData = data || {};
+//     xhttp.send(postData);
+// }
 
-function makeAjaxCall(url,respondFn,type,data){
+function getAjaxPromise(requestUrl, requestType, postData){
 
-    var xhttp = new XMLHttpRequest(), reqType, postData;
-    xhttp.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
-            respondFn(JSON.parse(this.responseText));
-            //document.getElementById("demo").innerHTML = this.responseText;
-        }
-    };
-    if(!type){
-        reqType = "GET";
-    }else{
-        reqType = type.toUpperCase();
-        //Send the proper header information along with the request
+    if(!requestUrl){
+        return new Error('{"name":"NoReqURL","message":"Hey you! use url first"}');
     }
-    xhttp.open(reqType, url, true);
-    xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-    postData = data || {};
-    xhttp.send(postData);
+
+    if (requestType && requestType.toUpperCase()==="POST" && typeof postData === "undefined"){
+        return new Error('{"name":"NoPostData","message":"Need Post Data with requestType: POST"}');
+    }
+
+    var ajaxPromise = new Promise (function(resolve,reject){
+
+        var xhttp = new XMLHttpRequest();
+
+        // Set Type to GET or POST
+        if(!requestType) {
+            requestType = "GET";
+        }
+        else{
+            requestType = requestType.toUpperCase();
+        }
+
+        // Set data
+        postData = postData || {} ;
+
+        xhttp.open(requestType,requestUrl,true);
+        //xhttp.setRequestHeader("Content-type", "multipart/form-data");
+        xhttp.onload = function(){
+            if(xhttp.status === 200)
+                resolve(JSON.parse(xhttp.response));
+            else
+                reject(xhttp.statusText);
+        }
+        xhttp.onerror = function(){
+            reject(xhttp.statusText);
+        }
+
+        xhttp.send(postData);
+    });
+
+    return ajaxPromise;
 }
 
 function initCarousel(){
@@ -49,7 +90,7 @@ function initCarousel(){
     var allCars = [], currentCarid="";
 
     function init(){
-        makeAjaxCall(getCarsUrl,function(data){
+        getAjaxPromise(getCarsUrl).then(function(data){
             allCars=data;
             if(allCars.length){
                 updateCarousel(allCars[0]["carid"]);
@@ -72,19 +113,20 @@ function initCarousel(){
 
            var sectionAddCar = document.getElementById("section-add-car");
            sectionAddCar.style.display = "block";
-
         });
 
         var linkRemoveAll = document.getElementById("link-remove-all");
-        linkRemoveAll.addEventListener("click", function(){
+        linkRemoveAll.addEventListener("click", function() {
             var blnRemoveConfirm = window.confirm("Are you sure to delete all cars");
-            if(blnRemoveConfirm){
+            if (blnRemoveConfirm) {
 
-              for(var k=allCars.length-1; k>=0; k--){
-                    removeCarFromTable(allCars[k].carid);
+                for (var k = allCars.length - 1; k >= 0; k--) {
+                    getAjaxPromise("/api/removecar", "POST", "carid=" + allCars[k].carid).then(function (data) {
+                        //removeCarFromTable(allCars[k].carid);
+                        //removeCarFromTable(allCars[k].carid);
+                    });
                 }
             }
-
         });
 
         var btnAddCar = document.getElementById("btn-add-car");
@@ -96,18 +138,16 @@ function initCarousel(){
 
             var formData = new FormData(formAddCar);
 
-            //for(var i=0; i< inputs.length; i++){
-            //    formData[inputs[i].name] = inputs[i].value;
-            //}
+            // for(var i=0; i< inputs.length; i++){
+            //     formData[inputs[i].name] = inputs[i].value;
+            // }
+            //
+            // var formPostdata = JSON.stringify(formData);
 
-            //var formPostdata = JSON.stringify(formData);
-
-            makeAjaxCall(urlAddCar,function(data){
+            getAjaxPromise(urlAddCar,"POST",formData).then(function(data){
                 console.log("Added New Car",data);
-            },"POST",formData);
-
+            });
         });
-
     }
 
     function updateCarousel(carid){
@@ -195,9 +235,11 @@ function initCarousel(){
             newAnchor.textContent = "Remove";
             newAnchor.carid = result[i].carid;
             newAnchor.addEventListener("click",function(evt){
-                makeAjaxCall("/api/removecar",function(data){
+                var formPostData = new FormData();
+                formPostData.append('carid',evt.target.carid);
+                getAjaxPromise("/api/removecar","POST",formPostData).then(function(data){
                     removeCarFromTable(evt.target.carid);
-                },"POST","carid="+evt.target.carid);
+                });
             });
             newAnchor.href="#";
             newTd6.appendChild(newAnchor);
@@ -220,11 +262,9 @@ function initCarousel(){
         }
     }
 
-    return {
+    return{
         init: init
-
-    };
-
+    }
 }
 
 function hideAddCar(){
@@ -232,4 +272,4 @@ function hideAddCar(){
     document.getElementById("section-main").style.display = "block";
 }
 
-document.addEventListener("DOMContentLoaded",initCarousel().init,false);
+document.addEventListener("DOMContentLoaded",function(){initCarousel().init()},false)

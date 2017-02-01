@@ -1,7 +1,8 @@
 var express = require('express'),
     path = require('path'),
     routes = require('./routes'),
-    bodyParser = require('body-parser');
+    bodyParser = require('body-parser'),
+    fileUpload = require('express-fileupload');
     //mongoose = require('mongoose');
 
 
@@ -11,10 +12,12 @@ var app = express();
 //add some standard express middleware
 app.configure(function() {
     app.use(express.logger('dev')); /* 'default', 'short', 'tiny', 'dev' */
+
     app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
     app.use(bodyParser.json());
-    app.use(express.bodyParser());
-
+    app.use(fileUpload({
+        limits: { fileSize: 50 * 1024 * 1024 },
+    }));
     app.use(express.cookieParser());
     app.use(express.static('static'));
     app.use(express.static(path.join(__dirname, '../frontend')));
