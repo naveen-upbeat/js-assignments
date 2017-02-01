@@ -11,6 +11,18 @@
  *  Write TestCases using Jasmine
  *
  * */
+function storeResponse(){
+    var responseData;
+    return{
+        _getResponse: function(){
+            return responseData;
+        },
+        setResponse: function(data){
+            responseData = data;
+        }
+    }
+}
+
 function makeAjaxCall(url,respondFn,type,data){
 
     var xhttp = new XMLHttpRequest(), reqType, postData;
@@ -220,4 +232,4 @@ function hideAddCar(){
     document.getElementById("section-main").style.display = "block";
 }
 
-initCarousel().init();
+document.addEventListener("DOMContentLoaded",initCarousel().init,false);

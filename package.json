@@ -5,11 +5,22 @@
   "main": "./backend/app.js",
   "dependencies": {
     "express": "3.x",
+    "gulp": "^3.9.1",
+    "gulp-jshint": "^2.0.4",
+    "gulp-util": "^3.0.8",
+    "jasmine": "^2.5.3",
+    "jshint": "^2.9.4",
+    "jshint-stylish": "^2.2.1",
+    "karma": "^1.4.1",
+    "karma-chrome-launcher": "^2.0.0",
+    "karma-html2js-preprocessor": "^1.1.0",
+    "karma-jasmine": "^1.1.0",
     "mongodb": "^2.2.21",
     "mongoose": "^4.7.7"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "tst": "pwd && exit 1",
+    "test": "/Users/sirugumn/mongodb-osx-x86_64-3.4.1/bin/mongod --dbpath /Users/sirugumn/mongodb-osx-x86_64-3.4.1/data/db",
     "start": "node ./backend/app.js"
   },
   "keywords": [
